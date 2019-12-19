@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 /**
  * @author OpenKey Inc.
- * <p>
- * This interface will provide callback methods to user(Third Party Developer)
- * for success or fai.ure of every operation of the SDK.
+ *         <p>
+ *         This interface will provide callback methods to user(Third Party Developer)
+ *         for success or fai.ure of every operation of the SDK.
  */
 
 public interface OpenKeyCallBack {

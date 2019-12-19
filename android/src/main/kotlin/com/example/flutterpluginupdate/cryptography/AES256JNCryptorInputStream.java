@@ -5,7 +5,7 @@
  *  @author OpenKey Inc.
  *
  */
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 import java.io.EOFException;
 import java.io.FilterInputStream;
@@ -229,8 +229,8 @@ public class AES256JNCryptorInputStream extends InputStream {
      * @throws IOException               If the first byte cannot be read for any reason other than end of
      *                                   file, or if the input stream has been closed, or if some other
      *                                   I/O error occurs.
-     * @throws NullPointerException      If <code>b</code> is <code>null</code>.
-     * @throws IndexOutOfBoundsException If <code>off</code> is negative, <code>len</code> is negative, or
+     * @throws        <code>b</code> is <code>null</code>.
+     * @throws   <code>off</code> is negative, <code>len</code> is negative, or
      *                                   <code>len</code> is greater than <code>b.length - off</code>
      * @throws StreamIntegrityException  if the final byte has been read and the HMAC fails validation
      */

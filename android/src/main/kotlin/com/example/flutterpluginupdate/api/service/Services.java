@@ -1,19 +1,22 @@
 package com.example.flutterpluginupdate.api.service;
 
-
 import com.example.flutterpluginupdate.api.model.KeyStatusRequest;
 import com.example.flutterpluginupdate.api.model.SdkLogRequest;
+import com.example.flutterpluginupdate.api.response.Mobile_key_status.KeyStatusResp;
+import com.example.flutterpluginupdate.api.response.invitation_code.InvitationCode;
 import com.example.flutterpluginupdate.api.response.key_status.KeyStatusResponse;
 import com.example.flutterpluginupdate.api.response.logaction.LogActionResponse;
 import com.example.flutterpluginupdate.api.response.mobile_key_response.MobileKeyResponse;
 import com.example.flutterpluginupdate.api.response.personlization.PersonlizationResponse;
 import com.example.flutterpluginupdate.api.response.session.SessionResponse;
+import com.example.flutterpluginupdate.kaba.response.invitationcode.KabaToken;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 /**
  * @author OpenKey Inc.
@@ -26,12 +29,16 @@ public interface Services {
     //V5
 //    String key = "45144534-f181-4011-b142-5d53162a95c8";
 //    String key = Utilities.getInstance().getValue(Constants.UUID,"",)
-
+    String type = "application/vnd.assaabloy-com.credential-2.3+json";
 
     //-----------------------------------------------------------------------------------------------------------------|
 
     @GET("sdk/v5/sessions")
     Call<SessionResponse> getSession(@Header("Authorization") String Authorization);
+    //-----------------------------------------------------------------------------------------------------------------|
+
+    @GET("sdk/v5/sessions/initializePersonalization.json")
+    Call<InvitationCode> initializePersonalization(@Header("Authorization") String Authorization);
     //-----------------------------------------------------------------------------------------------------------------|
 
     @GET("sdk/v5/sessions/9/session_mobile_keys")
@@ -42,8 +49,17 @@ public interface Services {
     Call<PersonlizationResponse> setPeronalizationComplete(@Header("Authorization") String Authorization);
     //-----------------------------------------------------------------------------------------------------------------|
 
+    @GET("sdk/v5/sessions/initializePersonalization.json")
+    Call<KabaToken> initializePersonalizationForKaba(@Header("Authorization") String Authorization);
+    //-----------------------------------------------------------------------------------------------------------------|
+
     @POST("sdk/v5/sessions/setMobileKeyStatus")
-    Call<KeyStatusResponse> setKeyStatus(@Header("Authorization") String Authorization, @Body KeyStatusRequest keyStatusRequest);
+    Call<KeyStatusResponse> setKeyStatus(@Header("Authorization") String Authorization,
+                                         @Body KeyStatusRequest keyStatusRequest);
+    //-----------------------------------------------------------------------------------------------------------------|
+
+    @GET("sdk_api/v1/sessions/{session_id}/mobile_keys/getStatus")
+    Call<KeyStatusResp> getStatus(@Header("Authorization") String Authorization, @Path("session_id") String session_id);
     //-----------------------------------------------------------------------------------------------------------------|
 
     @POST("/sdk/v5/sessions/logAction")

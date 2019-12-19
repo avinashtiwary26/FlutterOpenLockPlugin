@@ -39,11 +39,23 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.flutterpluginupdateexample"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 28
+        multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+
+    dexOptions {
+        javaMaxHeapSize System.getenv("DISABLE_DEX_MAX_HEAP") ? null : "8g"
+        preDexLibraries = false
+    }
+
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 
     buildTypes {
@@ -64,4 +76,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.58'
+    implementation 'com.google.android.gms:play-services-gcm:16.1.0'
+    implementation(name: 'Alv2Service_v1.3.4', ext: 'aar')
 }

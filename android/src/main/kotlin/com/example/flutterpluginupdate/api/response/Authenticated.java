@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * @author OpenKey Inc.
- * <p>
- * Response from openkey server, is user authorized to use SDK
+ *         <p>
+ *         Response from openkey server, is user authorized to use SDK
  */
 
 public class Authenticated {

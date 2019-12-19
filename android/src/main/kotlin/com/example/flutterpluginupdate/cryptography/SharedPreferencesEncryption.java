@@ -7,7 +7,7 @@
  *
  */
 
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -18,7 +18,6 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -119,7 +118,7 @@ public class SharedPreferencesEncryption implements SharedPreferences {
         try {
             final Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(SharedPreferencesEncryption.sKey, "AES"));
-            return SharedPreferencesEncryption.encode(cipher.doFinal(cleartext.getBytes(StandardCharsets.UTF_8)));
+            return SharedPreferencesEncryption.encode(cipher.doFinal(cleartext.getBytes("UTF-8")));
         } catch (Exception e) {
 
             return null;
@@ -133,7 +132,7 @@ public class SharedPreferencesEncryption implements SharedPreferences {
         try {
             final Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(SharedPreferencesEncryption.sKey, "AES"));
-            return new String(cipher.doFinal(SharedPreferencesEncryption.decode(ciphertext)), StandardCharsets.UTF_8);
+            return new String(cipher.doFinal(SharedPreferencesEncryption.decode(ciphertext)), "UTF-8");
         } catch (Exception e) {
             Log.w(SharedPreferencesEncryption.class.getName(), "decrypt", e);
             return null;

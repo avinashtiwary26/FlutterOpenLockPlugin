@@ -6,7 +6,7 @@
  *
  */
 
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 /**
  * An exception thrown when invalid data is encountered.

@@ -5,8 +5,8 @@ import com.example.flutterpluginupdate.api.response.session.SessionResponse;
 
 /**
  * @author OpenKey Inc.
- * <p>
- * Singleton class so that booking can be accessed from any where in the app
+ *         <p>
+ *         Singleton class so that booking can be accessed from any where in the app
  */
 
 public class GetBooking {

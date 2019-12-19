@@ -6,7 +6,7 @@
  *
  */
 
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 import java.util.Arrays;
 
@@ -364,6 +364,9 @@ abstract class AES256Ciphertext {
         if (options != other.options) {
             return false;
         }
-        return version == other.version;
+        if (version != other.version) {
+            return false;
+        }
+        return true;
     }
 }

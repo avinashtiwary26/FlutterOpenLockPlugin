@@ -8,6 +8,7 @@ import com.example.flutterpluginupdate.Utilities.Response;
 import com.example.flutterpluginupdate.Utilities.Utilities;
 import com.example.flutterpluginupdate.api.model.KeyStatusRequest;
 import com.example.flutterpluginupdate.api.model.SdkLogRequest;
+import com.example.flutterpluginupdate.api.response.Mobile_key_status.KeyStatusResp;
 import com.example.flutterpluginupdate.api.response.key_status.KeyStatusResponse;
 import com.example.flutterpluginupdate.api.response.logaction.LogActionResponse;
 import com.example.flutterpluginupdate.api.response.mobile_key_response.MobileKeyResponse;
@@ -16,6 +17,11 @@ import com.example.flutterpluginupdate.api.response.session.SessionResponse;
 import com.example.flutterpluginupdate.api.service.Services;
 import com.example.flutterpluginupdate.interfaces.OpenKeyCallBack;
 import com.example.flutterpluginupdate.singleton.GetBooking;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,8 +32,8 @@ import static com.example.flutterpluginupdate.Utilities.Constants.TOKEN;
 
 /**
  * @author OpenKey Inc.
- * <p>
- * This class will hold all the api calls made from the SDK
+ *         <p>
+ *         This class will hold all the api calls made from the SDK
  */
 public class Api {
 
@@ -142,6 +148,52 @@ public class Api {
     //-----------------------------------------------------------------------------------------------------------------|
 
 
+    /*
+     * Getting the key status either key issued from backend or not
+     * */
+    @SuppressWarnings("unchecked")
+    public static void getKeyStatus(final Context context, final Callback callback) {
+
+        if (context == null)
+            return;
+
+        Services services = Utilities.getInstance().getRetrofit(context).create(Services.class);
+        final String tokenStr = Utilities.getInstance().getValue(Constants.AUTH_SIGNATURE, "", context);
+        final String bookingId = Utilities.getInstance().getValue(Constants.BOOKING_ID, "", context);
+        services.getStatus(TOKEN + tokenStr, bookingId).enqueue(new Callback<KeyStatusResp>() {
+            @Override
+            public void onResponse(Call<KeyStatusResp> call, retrofit2.Response<KeyStatusResp> response) {
+                Log.e("onResponse", "onResponse");
+            }
+
+            @Override
+            public void onFailure(Call<KeyStatusResp> call, Throwable t) {
+                callback.onFailure(call, t);
+                Log.e("onFailure", "onFailure" + t.getMessage());
+            }
+        });
+    }
+    //-----------------------------------------------------------------------------------------------------------------|
+
+    /**
+     * Gets date time.
+     *
+     * @param format Type of the format of date or time
+     * @return Get current date and time of the device, according to the format
+     * @description Return string contains date if this format yyyy/MM/dd is
+     * passed or time if this HH:mm:ss is passed and return both
+     * with combined format yyyy/MM/dd HH:mm:ss
+     */
+    public static String getDateTime(String format) {
+        DateFormat dateFormat = new SimpleDateFormat(format, Locale.ENGLISH);
+        String Time = null;
+        Date date = new Date();
+        Time = dateFormat.format(date);
+        return Time;
+    }
+    //-----------------------------------------------------------------------------------------------------------------|
+
+
     /**
      * @param context application's context
      */
@@ -187,10 +239,12 @@ public class Api {
 
                     PersonlizationResponse personlizationResponse = response.body();
                     if (personlizationResponse != null && personlizationResponse.getData() != null
-                            && personlizationResponse.getData().getKeyIssued())
+                            && personlizationResponse.getData().getKeyIssued()) {
                         openKeyCallBack.initializationSuccess();
-                    else
+                    } else {
                         openKeyCallBack.isKeyAvailable(false, Response.FETCH_KEY_FAILED);
+
+                    }
 
                     Log.e(TAG, "Personalization Status updated on server");
                 } else if (response.code() == 403) {
@@ -209,7 +263,41 @@ public class Api {
             }
         });
     }
+    //-----------------------------------------------------------------------------------------------------------------|
 
+    /**
+     * @param context
+     * @param callback
+     */
+    @SuppressWarnings("unchecked")
+    public static void setInitializePersonalizationForKaba(final Context context, final Callback callback
+            , OpenKeyCallBack openKeyCallBack) {
+        final String tokenStr = Utilities.getInstance().getValue(Constants.AUTH_SIGNATURE, "", context);
+
+        if (context == null || tokenStr == null && openKeyCallBack != null)
+            openKeyCallBack.initializationFailure(Response.INITIALIZATION_FAILED);
+
+        Services services = Utilities.getInstance().getRetrofit(context).create(Services.class);
+        services.initializePersonalizationForKaba(TOKEN + tokenStr).enqueue(new RetrofitCallback(callback));
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------|
+
+    /**
+     * @param context
+     * @param callback
+     */
+    @SuppressWarnings("unchecked")
+    public static void setInitializePersonalization(final Context context, final Callback callback
+            , OpenKeyCallBack openKeyCallBack) {
+        final String tokenStr = Utilities.getInstance().getValue(Constants.AUTH_SIGNATURE, "", context);
+
+        if (context == null || tokenStr == null)
+            openKeyCallBack.initializationFailure(Response.INITIALIZATION_FAILED);
+
+        Services services = Utilities.getInstance().getRetrofit(context).create(Services.class);
+        services.initializePersonalization(TOKEN + tokenStr).enqueue(new RetrofitCallback(callback));
+    }
 
     //-----------------------------------------------------------------------------------------------------------------|
 

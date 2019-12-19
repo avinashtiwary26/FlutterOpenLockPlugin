@@ -11,24 +11,42 @@ class FlutterPluginUpdate {
     return version;
   }
 
-  static Future<Null> init(String uuid) async {
+
+  static Future<dynamic> init(String uuid) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("UUID", () => uuid);
     await _channel.invokeMethod('openkeysdkinit', args);
     return null;
   }
 
-  static Future<Null> authenticate(String token) async {
+  static Future<dynamic> authenticate(String token) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("token", () => token);
-    await _channel.invokeMethod('openkeysdkauthenticate', args);
-    return null;
+    var data = await _channel.invokeMethod('openkeysdkauthenticate', args);
+    return data;
   }
 
-  static Future<Null> openLock(String roomTitle) async {
+  static Future<dynamic> sdkInitialize() async {
+    var data = await _channel.invokeMethod('openkeysdkinitialize');
+    return data;
+  }
+
+
+  static Future<dynamic> getKey() async {
+    var data = await _channel.invokeMethod('openkeysdkgetkey');
+    return data;
+  }
+
+  static Future<dynamic> openLock(String roomTitle) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("room", () => roomTitle);
-    await _channel.invokeMethod('openkeysdkstartscanning', args);
-    return null;
+    var data = await _channel.invokeMethod('openkeysdkstartscanning', args);
+    return data;
+  }
+
+
+  static Future<dynamic> isKeyAvailabe() async {
+    var data = await _channel.invokeMethod('isKeyAvailabe');
+    return data;
   }
 }

@@ -1,8 +1,8 @@
 name: flutter_plugin_update
 description: A new Flutter plugin.
 version: 0.0.1
-author:
-homepage:
+author: Avinash Tiwary<avinashtiwarydit35@gmail.com>
+homepage: https://github.com/avinashtiwary26/FlutterOpenLockPlugin
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

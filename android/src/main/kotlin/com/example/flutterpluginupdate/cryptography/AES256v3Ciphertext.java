@@ -5,7 +5,7 @@
  *  @author OpenKey Inc.
  *
  */
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 /**
  * Version 3 format.

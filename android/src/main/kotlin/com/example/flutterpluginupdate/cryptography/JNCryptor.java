@@ -6,7 +6,7 @@
  *
  */
 
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 import javax.crypto.SecretKey;
 
@@ -54,7 +54,8 @@ public interface JNCryptor {
      * @throws CryptorException
      * @since 1.2.0
      */
-    byte[] encryptData(byte[] plaintext, PasswordKey encryptionKey, PasswordKey hmacKey) throws CryptorException;
+    byte[] encryptData(byte[] plaintext, PasswordKey encryptionKey,
+                       PasswordKey hmacKey) throws CryptorException;
 
     /**
      * Encrypts data with the supplied password, salt values and IV.
@@ -71,7 +72,8 @@ public interface JNCryptor {
      * @throws CryptorException if an error occurred
      * @since 1.2.0
      */
-    byte[] encryptData(byte[] plaintext, char[] password, byte[] encryptionSalt, byte[] hmacSalt, byte[] iv) throws CryptorException;
+    byte[] encryptData(byte[] plaintext, char[] password, byte[] encryptionSalt,
+                       byte[] hmacSalt, byte[] iv) throws CryptorException;
 
     /**
      * Decrypts data with the supplied password.
@@ -100,7 +102,8 @@ public interface JNCryptor {
      * @return the plain text
      * @throws InvalidHMACException
      */
-    byte[] decryptData(byte[] ciphertext, SecretKey decryptionKey, SecretKey hmacKey) throws CryptorException, InvalidHMACException;
+    byte[] decryptData(byte[] ciphertext, SecretKey decryptionKey,
+                       SecretKey hmacKey) throws CryptorException, InvalidHMACException;
 
     /**
      * Encrypts data with the supplied password.
@@ -126,7 +129,8 @@ public interface JNCryptor {
      * >https://github.com/RNCryptor/RNCryptor-Spec/blob/master/RNCryptor-
      * Spec-v3.md</a>
      */
-    byte[] encryptData(byte[] plaintext, SecretKey encryptionKey, SecretKey hmacKey) throws CryptorException;
+    byte[] encryptData(byte[] plaintext, SecretKey encryptionKey,
+                       SecretKey hmacKey) throws CryptorException;
 
     /**
      * Returns the version number of the data format produced by this

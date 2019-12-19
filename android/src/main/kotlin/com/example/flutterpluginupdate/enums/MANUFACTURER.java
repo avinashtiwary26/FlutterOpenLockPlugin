@@ -6,10 +6,10 @@
  *
  */
 
-package com.example.flutteropenkeysdkplugin.enums;
+package com.example.flutterpluginupdate.enums;
 
 /**
  * Enum for lock type
  */
-public enum MANUFACTURER {OKMOBILEKEY
+public enum MANUFACTURER {ASSA, SALTO, KABA, MIWA, ENTRAVA, ENTRAVATOUCH, OKC, MODULE, OKMOBILEKEY
 }

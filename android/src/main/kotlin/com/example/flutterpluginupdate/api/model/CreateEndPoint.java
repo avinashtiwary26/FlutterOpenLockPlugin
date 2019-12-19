@@ -1,0 +1,9 @@
+package com.example.flutterpluginupdate.api.model;
+
+public class CreateEndPoint {
+    private String endpointId;
+
+    public CreateEndPoint(String endpointId) {
+        this.endpointId = endpointId;
+    }
+}

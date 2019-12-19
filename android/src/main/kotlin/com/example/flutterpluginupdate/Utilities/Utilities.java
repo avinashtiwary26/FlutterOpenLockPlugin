@@ -8,25 +8,37 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Vibrator;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.Toast;
 
-import com.example.flutteropenkeysdkplugin.cryptography.SharedPreferencesEncryption;
-import com.example.flutteropenkeysdkplugin.enums.MANUFACTURER;
-import com.example.flutteropenkeysdkplugin.singleton.GetGson;
+import com.example.flutterpluginupdate.api.response.Status;
 import com.example.flutterpluginupdate.api.response.session.SessionResponse;
+import com.example.flutterpluginupdate.cryptography.SharedPreferencesEncryption;
+import com.example.flutterpluginupdate.enums.MANUFACTURER;
 import com.example.flutterpluginupdate.interfaces.OpenKeyCallBack;
 import com.google.gson.Gson;
+import com.openkey.sdk.singleton.GetGson;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
-import okhttp3.*;
+import okhttp3.ConnectionSpec;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.ResponseBody;
+import okhttp3.TlsVersion;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -84,9 +96,12 @@ public class Utilities {
             return false;
         }
 
-        //we are connected to a network
-        return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
+        if (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            return true;
+        } else
+            return false;
 
     }
 
@@ -104,6 +119,18 @@ public class Utilities {
         saveValue.remove(key).apply();
     }
 
+    /*
+     * Decode key into base64
+     * */
+    public String decodeMiwaKey(String miwaKey) {
+        byte[] valueDecoded = new byte[0];
+        try {
+            valueDecoded = Base64.decode(miwaKey.getBytes("UTF-8"), Base64.DEFAULT);
+        } catch (UnsupportedEncodingException e) {
+            Log.e("EncodingException", ":" + e.getMessage());
+        }
+        return new String(valueDecoded);
+    }
 
     /**
      * Save value to shared preference.
@@ -146,6 +173,57 @@ public class Utilities {
         vibrator.vibrate(300);
     }
 
+    /**
+     * Show toast.
+     *
+     * @param context the context
+     * @param toast   String value which needs to shown in the toast.
+     *                if you want to print a toast just call this method and pass
+     *                what you want to be shown.
+     */
+    public Toast showToast(Context context, String toast) {
+        if (context != null && msg == null || msg.getView().getWindowVisibility() != View.VISIBLE) {
+            msg = Toast.makeText(context, toast, Toast.LENGTH_LONG);
+            msg.setGravity(Gravity.CENTER, 0, 0);
+            msg.show();
+        }
+
+
+        return msg;
+    }
+
+    /**
+     * retrofit for KABA
+     */
+    public Retrofit getRetrofitForKaba() {
+
+        Retrofit retrofit;
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        // set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+
+        httpClient.networkInterceptors().add(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
+                Request request = chain.request().newBuilder()
+                        .addHeader("Accept", "application/json")
+                        .addHeader("Content-type", "application/json")
+                        .addHeader("Authorization", "Basic UHJlYXV0aE9wZW5LZXlUZWNoVXNlcjpmOEtDY3VNUkpLOGRNUDMwYWtNcg==")
+                        .build();
+                return chain.proceed(request);
+            }
+        });
+
+
+        httpClient.addInterceptor(logging);
+        retrofit = new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(Constants.URL_KABA_BASE)
+                .client(httpClient.build())
+                .build();
+
+        return retrofit;
+    }
 
     /**
      * Save value to shared preference.
@@ -243,6 +321,27 @@ public class Utilities {
         return retrofit;
     }
 
+    /**
+     * Show toast of message if api response code is not 200
+     *
+     * @param responseBody Get message from the response body
+     */
+    public String handleApiError(ResponseBody responseBody, Context context) {
+        Converter<ResponseBody, Status> errorConverter = getRetrofit(context)
+                .responseBodyConverter(Status.class, new Annotation[0]);
+        try {
+            Status error = errorConverter.convert(responseBody);
+            if (!TextUtils.isEmpty(error.getMessage())) {
+                Log.e("", "Response message : " + error.getMessage());
+                return error.getMessage().toLowerCase();
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private OkHttpClient getNewHttpClient(Context context) {
         final String UUID = Utilities.getInstance().getValue(Constants.UUID, "", context);
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -269,6 +368,39 @@ public class Utilities {
         });
         return enableTls12OnPreLollipop(client).build();
     }
+
+    /**
+     * @return return retrofit instance
+     * <p>
+     * retrofit = new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+     * .baseUrl("https://demo.credential-services.sci.assaabloy.net")
+     * .client(httpClient.build())
+     * .build();
+     * <p>
+     * return retrofit;
+     */
+//    public Retrofit getRetrofitForASSA(Context context) {
+//        Retrofit retrofit;
+//        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//        // set your desired log level
+//        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+//        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+//        httpClient.addInterceptor(logging);
+//
+//        String url=Constants.ASSA_DEV_URL;
+//
+//        if (context!=null)
+//        {
+//           url=Utilities.getInstance().getValue(Constants.ASSA_BASE_URL,Constants.ASSA_DEV_URL,context);
+//        }
+//
+//        retrofit = new Retrofit.Builder()
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .baseUrl(url)
+//                .client(httpClient.build())
+//                .build();
+//        return retrofit;
+//    }
 
     /**
      * Save the booking to shared preference

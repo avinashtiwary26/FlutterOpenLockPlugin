@@ -1,11 +1,11 @@
-package com.example.flutteropenkeysdkplugin.singleton;
+package com.openkey.sdk.singleton;
 
 import com.google.gson.Gson;
 
 /**
  * @author OpenKey Inc.
- * <p>
- * Single Instance For GSON
+ *         <p>
+ *         Single Instance For GSON
  */
 public class GetGson {
     private static Gson mInstance;

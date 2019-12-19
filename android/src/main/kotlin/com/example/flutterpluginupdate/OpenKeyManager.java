@@ -6,14 +6,21 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.example.flutteropenkeysdkplugin.enums.MANUFACTURER;
 import com.example.flutterpluginupdate.Utilities.Constants;
 import com.example.flutterpluginupdate.Utilities.Response;
 import com.example.flutterpluginupdate.Utilities.Utilities;
 import com.example.flutterpluginupdate.api.request.Api;
 import com.example.flutterpluginupdate.api.response.session.SessionResponse;
+import com.example.flutterpluginupdate.assa.ASSA;
+import com.example.flutterpluginupdate.entrava.Entrava;
+import com.example.flutterpluginupdate.enums.MANUFACTURER;
 import com.example.flutterpluginupdate.interfaces.OpenKeyCallBack;
+import com.example.flutterpluginupdate.kaba.Kaba;
+import com.example.flutterpluginupdate.miwa.Miwa;
+import com.example.flutterpluginupdate.okc.OKC;
 import com.example.flutterpluginupdate.okmobilekey.OKMobileKey;
+import com.example.flutterpluginupdate.okmodule.OKModule;
+import com.example.flutterpluginupdate.salto.Salto;
 import com.example.flutterpluginupdate.singleton.GetBooking;
 
 import retrofit2.Call;
@@ -32,9 +39,19 @@ public final class OpenKeyManager {
     private static volatile OpenKeyManager instance;
     private static Application mContext;
     private MANUFACTURER manufacturer;
+    private ASSA assa;
+    private Salto salto;
+    private Kaba kaba;
+    private Entrava entrava;
+    private Miwa miwa;
+    private OKC okc;
+    private OKModule okModule;
+
     private OKMobileKey okMobileKey;
+
     private OpenKeyCallBack mOpenKeyCallBack;
 
+    private boolean mEnvironmentType;
 
     //-----------------------------------------------------------------------------------------------------------------|
     //-----------------------------------------------------------------------------------------------------------------|
@@ -152,11 +169,38 @@ public final class OpenKeyManager {
 
         manufacturer = Utilities.getInstance().getManufacturer(mContext, openKeyCallBack);
         switch (manufacturer) {
+            case ASSA:
+                assa = new ASSA(mContext, openKeyCallBack);
+                break;
+
+            case SALTO:
+                salto = new Salto(mContext, openKeyCallBack);
+                break;
+
+            case KABA:
+                kaba = new Kaba(mContext, openKeyCallBack);
+                break;
+
+            case MIWA:
+                miwa = new Miwa(mContext, openKeyCallBack);
+                break;
+
+            case OKC:
+                okc = new OKC(mContext, openKeyCallBack);
+                break;
+
+            case MODULE:
+                okModule = new OKModule(mContext, openKeyCallBack);
+                break;
 
             case OKMOBILEKEY:
                 okMobileKey = new OKMobileKey(mContext, openKeyCallBack);
                 break;
 
+            case ENTRAVA:
+            case ENTRAVATOUCH:
+                entrava = new Entrava(mContext, openKeyCallBack);
+                break;
         }
     }
 
@@ -168,7 +212,7 @@ public final class OpenKeyManager {
      * @param openKeyCallBack Call back for response purpose
      */
     public synchronized void getKey(@NonNull final OpenKeyCallBack openKeyCallBack) {
-        if (mContext == null && okMobileKey == null) {
+        if (mContext == null && assa == null && salto == null && kaba == null && miwa == null && entrava == null && okc == null && okModule == null && okMobileKey == null) {
             openKeyCallBack.isKeyAvailable(false, Response.FETCH_KEY_FAILED);
             return;
         }
@@ -194,6 +238,46 @@ public final class OpenKeyManager {
 
         manufacturer = Utilities.getInstance().getManufacturer(mContext, mOpenKeyCallBack);
         switch (manufacturer) {
+            case ASSA:
+                if (assa.isSetupComplete()) {
+                    assa.getKey();
+                } else {
+                    Log.e("Setup for assa", "failed");
+                    mOpenKeyCallBack.initializationFailure(Response.NOT_INITIALIZED);
+                }
+                break;
+
+            case SALTO:
+                updateKeyStatus(true);
+                mOpenKeyCallBack.isKeyAvailable(true, Response.FETCH_KEY_SUCCESS);
+                break;
+
+            case KABA:
+                kaba.synchronise();
+                break;
+
+            case MIWA:
+                updateKeyStatus(true);
+                miwa.addKey();
+                mOpenKeyCallBack.isKeyAvailable(true, Response.FETCH_KEY_SUCCESS);
+                break;
+
+            case ENTRAVA:
+            case ENTRAVATOUCH:
+                entrava.issueEntravaKey();
+                break;
+
+            case OKC:
+                okc.fetchOkcRoomList();
+                updateKeyStatus(true);
+                mOpenKeyCallBack.isKeyAvailable(true, Response.FETCH_KEY_SUCCESS);
+                break;
+
+            case MODULE:
+                okModule.fetchOkModuleRoomList();
+                updateKeyStatus(true);
+                mOpenKeyCallBack.isKeyAvailable(true, Response.FETCH_KEY_SUCCESS);
+                break;
 
             case OKMOBILEKEY:
                 okMobileKey.fetchOkMobileKeyRoomList();
@@ -212,7 +296,7 @@ public final class OpenKeyManager {
      * @return boolean
      */
     public synchronized boolean isKeyAvailable(OpenKeyCallBack openKeyCallBack) {
-        if (okMobileKey == null) {
+        if (assa == null && salto == null && kaba == null && miwa == null && entrava == null && okc == null && okModule == null && okMobileKey == null) {
             Log.e("Started", "INITIALIZATION_FAILED");
             openKeyCallBack.initializationFailure(Response.INITIALIZATION_FAILED);
             initialize(openKeyCallBack);
@@ -221,6 +305,33 @@ public final class OpenKeyManager {
         boolean haveKey = false;
         manufacturer = Utilities.getInstance().getManufacturer(mContext, openKeyCallBack);
         switch (manufacturer) {
+            case ASSA:
+                haveKey = assa.haveKey();
+                break;
+
+            case SALTO:
+                haveKey = salto.haveKey();
+                break;
+
+            case KABA:
+                haveKey = kaba.haveKey();
+                break;
+
+            case MIWA:
+                haveKey = miwa.haveKey();
+                break;
+
+            case ENTRAVA:
+            case ENTRAVATOUCH:
+                haveKey = entrava.haveKey();
+                break;
+
+            case OKC:
+                haveKey = okc.haveKey();
+                break;
+            case MODULE:
+                haveKey = okModule.haveKey();
+                break;
 
             case OKMOBILEKEY:
                 haveKey = okMobileKey.haveKey();
@@ -251,11 +362,41 @@ public final class OpenKeyManager {
 
         if (isKeyAvailable(openKeyCallBack)) {
             switch (manufacturer) {
-
+                case OKC:
+                    okc.startScanning(roomNumber);
+                    break;
+                case MODULE:
+                    okModule.startScanning(roomNumber);
+                    break;
 
                 case OKMOBILEKEY:
                     okMobileKey.startScanning(roomNumber);
                     break;
+
+                case ASSA:
+                    if (assa.isSetupComplete()) {
+                        assa.startScanning();
+                    } else {
+                        openKeyCallBack.stopScan(false, Response.NOT_INITIALIZED);
+                    }
+                    break;
+                case SALTO:
+                    salto.startScanning();
+                    break;
+
+                case KABA:
+                    kaba.startScanning();
+                    break;
+
+                case MIWA:
+                    miwa.startScanning();
+                    break;
+
+                case ENTRAVA:
+                case ENTRAVATOUCH:
+                    entrava.startImGateScanningService();
+                    break;
+
 
             }
         } else {

@@ -6,7 +6,7 @@
  *
  */
 
-package com.example.flutteropenkeysdkplugin.cryptography;
+package com.example.flutterpluginupdate.cryptography;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
