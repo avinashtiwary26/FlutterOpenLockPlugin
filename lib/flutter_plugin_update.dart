@@ -18,7 +18,6 @@ class FlutterPluginUpdate {
     await _channel.invokeMethod('openkeysdkinit', args);
     return null;
   }
-
   static Future<dynamic> authenticate(String token) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("token", () => token);
@@ -34,6 +33,8 @@ class FlutterPluginUpdate {
 
   static Future<dynamic> getKey() async {
     var data = await _channel.invokeMethod('openkeysdkgetkey');
+
+    print("datatat $data");
     return data;
   }
 

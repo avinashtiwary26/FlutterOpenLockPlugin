@@ -1,5 +1,6 @@
 package com.example.flutterpluginupdate
 
+import android.app.Activity
 import android.app.Application
 import android.util.Log
 import com.example.flutterpluginupdate.Utilities.Utilities
@@ -13,10 +14,8 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.util.*
 
-class FlutterPluginUpdatePlugin(var activity: Application) : MethodCallHandler, OpenKeyCallBack {
+class FlutterPluginUpdatePlugin(var activity: Application) : MethodCallHandler, OpenKeyCallBack, Activity() {
     private var result: Result? = null
-    private var resultList: Result? = null
-
     private var type: Int = 0
     private var mAlreadyCall = false
     private var manufacturer: MANUFACTURER? = null
@@ -75,8 +74,8 @@ class FlutterPluginUpdatePlugin(var activity: Application) : MethodCallHandler, 
     }
 
     override fun isKeyAvailable(haveKey: Boolean, description: String?) {
-        Log.e("KEYAVAILBALE", haveKey.toString())
-        manufacturer = Utilities.getInstance().getManufacturer(activity, this)
+        Log.e("KEYAVAILBALEPOPLUGIN", haveKey.toString())
+        manufacturer = Utilities.getInstance().getManufacturer(activity.applicationContext, this)
 
         if (manufacturer == MANUFACTURER.OKC || manufacturer == MANUFACTURER.OKMOBILEKEY || manufacturer == MANUFACTURER.MODULE) {
             if (!haveKey) {
@@ -88,19 +87,23 @@ class FlutterPluginUpdatePlugin(var activity: Application) : MethodCallHandler, 
                 }
             }
         } else {
-            val map = HashMap<String, Any>()
-            map.put("keyavailable", haveKey)
-            if (mAlreadyCall) {
-                result?.success(map)
-                mAlreadyCall = false
+            runOnUiThread {
+
+                if (mAlreadyCall) {
+                    val map = HashMap<String, Any>()
+                    map.put("keyavailable", haveKey)
+                    result?.success(map)
+                    Log.e("keyavailable", "calllll")
+                    mAlreadyCall = false
+                }
             }
+
         }
     }
 
     override fun getOKCandOkModuleMobileKeysResponse(availableRooms: ArrayList<String>?) {
         Log.e("getOkOkc", "getOkOkc")
         val map = HashMap<String, Any>()
-        if (type == 3) {
             map.put("keyavailable", true)
             availableRooms?.let {
                 if (it.size > 0) {
@@ -111,7 +114,6 @@ class FlutterPluginUpdatePlugin(var activity: Application) : MethodCallHandler, 
                 result?.success(map)
                 mAlreadyCall = false
             }
-        }
 
     }
 
@@ -119,7 +121,6 @@ class FlutterPluginUpdatePlugin(var activity: Application) : MethodCallHandler, 
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         this.result = result
-        this.resultList = result
         mAlreadyCall = true
         if (call.method == "getPlatformVersion") {
             result.success("Android ${android.os.Build.VERSION.RELEASE}")

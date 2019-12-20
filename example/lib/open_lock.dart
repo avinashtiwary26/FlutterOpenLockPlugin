@@ -21,65 +21,77 @@ class _OpenLockState extends State<OpenLock> {
   }
 
   Future<dynamic> openDoor() async {
-    buffer.write("Open Door Process......");
-    buffer.write("\n");
-    _StreamController.add(buffer.toString());
-    var openDoorData = await FlutterPluginUpdate.openLock("103");
+    var isKeyAvailabeData = await FlutterPluginUpdate.isKeyAvailabe();
+    if (isKeyAvailabeData is Map) {
+      if (isKeyAvailabeData.containsKey("isKeyAvailabe")) {
+        bool isKey = isKeyAvailabeData["isKeyAvailabe"];
+        if (isKey) {
+          buffer.write("Open Door Process......");
+          buffer.write("\n");
+          _StreamController.add(buffer.toString());
+          var openDoorData = await FlutterPluginUpdate.openLock("103");
 
-    if (openDoorData is Map) {
-      if (openDoorData.containsKey("isLockOpened")) {
-        bool opnDoor = openDoorData["isLockOpened"];
+          if (openDoorData is Map) {
+            if (openDoorData.containsKey("isLockOpened")) {
+              bool opnDoor = openDoorData["isLockOpened"];
 
-        if (opnDoor) {
-          buffer.write("Open Door suceess");
-          buffer.write("\n");
-          _StreamController.add(buffer.toString());
-        }
-        else {
-          buffer.write("Open Door failed");
-          buffer.write("\n");
-          _StreamController.add(buffer.toString());
-        }
-      }
-      else if (openDoorData.containsKey("Initialize")) {
-        bool initialize = openDoorData["Initialize"];
-        if (!initialize) {
-          buffer.write("SDK Initialization Failure.....Try Again for get key");
-          buffer.write("\n");
-          _StreamController.add(buffer.toString());
+              if (opnDoor) {
+                buffer.write("Open Door suceess");
+                buffer.write("\n");
+                _StreamController.add(buffer.toString());
+              }
+              else {
+                buffer.write("Open Door failed");
+                buffer.write("\n");
+                _StreamController.add(buffer.toString());
+              }
+            }
+            else if (openDoorData.containsKey("Initialize")) {
+              bool initialize = openDoorData["Initialize"];
+              if (!initialize) {
+                buffer.write(
+                    "SDK Initialization Failure.....Try Again for get key");
+                buffer.write("\n");
+                _StreamController.add(buffer.toString());
+              }
+              else {
+                buffer.write(
+                    "Something went wrong,Please try again all process for get key");
+                buffer.write("\n");
+                _StreamController.add(buffer.toString());
+              }
+            }
+            else {
+              buffer.write(
+                  "Something went wrong,Please try again all process for get key");
+              buffer.write("\n");
+              _StreamController.add(buffer.toString());
+            }
+          }
         }
         else {
           buffer.write(
-              "Something went wrong,Please try again all process for get key");
+              "Key not available");
           buffer.write("\n");
           _StreamController.add(buffer.toString());
         }
-      }
-      else {
-        buffer.write(
-            "Something went wrong,Please try again all process for get key");
-        buffer.write("\n");
-        _StreamController.add(buffer.toString());
       }
     }
   }
 
 
   Future<dynamic> GetKey() async {
-    var isKeyAvailabeData = await FlutterPluginUpdate.isKeyAvailabe();
 
-    if (isKeyAvailabeData is Map) {
-      if (isKeyAvailabeData.containsKey("isKeyAvailabe")) {
-        bool isKey = isKeyAvailabeData["isKeyAvailabe"];
-        if (isKey) {
           var getKeyData = await FlutterPluginUpdate.getKey();
           if (getKeyData is Map) {
+            print("map available");
             if (getKeyData.containsKey("keyavailable")) {
               if (getKeyData.containsKey("roomList")) {
                 buffer.write("Get Room List suceess");
                 buffer.write("\n");
                 _StreamController.add(buffer.toString());
               }
+
               bool fetchKey = getKeyData["keyavailable"];
               if (fetchKey) {
                 buffer.write("fetch Key suceess");
@@ -113,14 +125,9 @@ class _OpenLockState extends State<OpenLock> {
               _StreamController.add(buffer.toString());
             }
           }
-        } else {
-          buffer.write(
-              "Key not available");
-          buffer.write("\n");
-          _StreamController.add(buffer.toString());
-        }
-      }
-    }
+          else {
+            print("not a map");
+          }
   }
 
   Future<dynamic> autheticate() async {
@@ -129,7 +136,7 @@ class _OpenLockState extends State<OpenLock> {
     _StreamController.add(buffer.toString());
     bool authSucess = false;
     var data = await FlutterPluginUpdate.authenticate(
-        "hon3kaoih6qt3kijy2xlqnovtqsa74cxdh6yymchz6vgoafnoxl6vd56skurtzsu");
+        "4vqs63md6mh6zm7yulqeogtjsjrywpyz24tf5zondhvkw3x2ue4ynai4onjhtu2a");
     if (data is Map) {
       print("calll ${data.containsKey("authentication")}");
 
@@ -155,7 +162,6 @@ class _OpenLockState extends State<OpenLock> {
         if (initializeData is Map) {
           sdkInitialize = false;
           if (initializeData.containsKey("Initialize")) {
-            var
             sdkInitialize = initializeData["Initialize"];
             if (sdkInitialize) {
               buffer.write("SDK Initialization Success");
@@ -173,7 +179,7 @@ class _OpenLockState extends State<OpenLock> {
             }
           }
           else if (initializeData.containsKey("keyavailable")) {
-            bool keyAvailable = data["keyavailable"];
+            bool keyAvailable = initializeData["keyavailable"];
             if (keyAvailable) {
               buffer.write(
                   "You have already a key for open door, please open door with this key");
